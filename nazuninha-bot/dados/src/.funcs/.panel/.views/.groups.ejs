@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nazuninha Bot - Grupos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .group-card {
+            transition: all 0.3s ease;
+        }
+        .group-card:hover {
+            transform: translateY(-5px);
+        }
+        .group-image {
+            aspect-ratio: 1;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 font-poppins transition-colors duration-200">
+    <!-- Navbar -->
+    <nav class="bg-white dark:bg-gray-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center space-x-4">
+                        <img src="/img/logo.png" alt="Logo" class="h-12 w-12 rounded-full shadow-lg">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Nazuninha Bot</h1>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Gerenciamento de Grupos</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        <span>Voltar ao Dashboard</span>
+                    </a>
+                    <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-moon text-gray-600 dark:text-gray-400 dark:hidden"></i>
+                        <i class="fas fa-sun text-yellow-400 hidden dark:block"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <% groups.forEach(group => { %>
+                <a href="/group/<%= group.id %>" class="group-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <div class="relative">
+                        <img src="<%= group.image %>" alt="<%= group.name %>" class="w-full group-image">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    </div>
+                    <div class="p-4">
+                        <h2 class="text-sm font-semibold text-gray-800 dark:text-white line-clamp-2 mb-2"><%= group.name %></h2>
+                        <div class="flex items-center text-gray-600 dark:text-gray-400">
+                            <i class="fas fa-users text-sm mr-2"></i>
+                            <span class="text-sm"><%= group.members %></span>
+                        </div>
+                    </div>
+                </a>
+            <% }); %>
+
+            <% if (groups.length === 0) { %>
+                <div class="col-span-full flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+                    <i class="fas fa-users text-6xl mb-4"></i>
+                    <p class="text-xl">Nenhum grupo encontrado</p>
+                </div>
+            <% } %>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 shadow-lg mt-8">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-600 dark:text-gray-400 mb-4 md:mb-0">
+                    Desenvolvido com ❤️ por Hiudy
+                </p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        // Check for saved theme preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
+        });
+    </script>
+</body>
+</html>
