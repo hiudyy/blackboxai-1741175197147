@@ -1,0 +1,160 @@
+// Adicione essas importações no topo do arquivo, junto com as outras:
+const { playerExists, createPlayer, deletePlayer, getPlayer, savePlayer, claimDaily, formatProfile, deposit, withdraw, depositAll, withdrawAll, transfer } = require('./.funcs/.rpg/rpgFunctions.js');
+
+// Adicione dentro do switch(command), junto com os outros comandos:
+
+case 'registrar':
+case 'register': {
+  if (playerExists(sender)) return reply('❌ Você já está registrado no RPG! Use /perfil para ver suas informações.');
+  if (!q) return reply('❌ Digite seu nome após o comando. Exemplo: /registrar João');
+  if (q.length > 20) return reply('❌ O nome deve ter no máximo 20 caracteres!');
+  
+  try {
+    const player = createPlayer(sender, q);
+    reply(`✅ Registro concluído com sucesso!\n\n${formatProfile(player)}`);
+  } catch {
+    reply('❌ Não foi possível fazer seu registro. Tente novamente.');
+  }
+}
+break;
+
+case 'deletar':
+case 'delete':
+case 'deleteregister': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  
+  try {
+    deletePlayer(sender);
+    reply('✅ Seu registro foi deletado com sucesso!');
+  } catch {
+    reply('❌ Não foi possível deletar seu registro.');
+  }
+}
+break;
+
+case 'perfil':
+case 'profile':
+case 'status': {
+  try {
+    const target = menc_os2 || sender;
+    if (!playerExists(target)) {
+      return reply(target === sender ? 
+        '❌ Você não está registrado no RPG! Use /registrar para começar.' :
+        '❌ Este usuário não está registrado no RPG!'
+      );
+    }
+    
+    const player = getPlayer(target);
+    await nazu.sendMessage(from, {
+      text: formatProfile(player),
+      mentions: [target]
+    }, { quoted: info });
+  } catch {
+    reply('❌ Não foi possível carregar o perfil.');
+  }
+}
+break;
+
+case 'daily':
+case 'reward':
+case 'recompensa': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  
+  try {
+    const result = claimDaily(sender);
+    reply(`✨ *Recompensa Diária Coletada!*\n\n💰 Você recebeu: R$ ${result.reward}\n🏦 Novo saldo: R$ ${result.newBalance}`);
+  } catch {
+    reply('❌ Você já coletou sua recompensa hoje! Volte amanhã.');
+  }
+}
+break;
+
+case 'depositar':
+case 'dep': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  if (!q) return reply('❌ Digite o valor que deseja depositar. Exemplo: /depositar 1000');
+  
+  try {
+    const amount = parseInt(q);
+    const result = deposit(sender, amount);
+    reply(`✅ *Depósito realizado com sucesso!*\n\n💰 Valor: R$ ${result.deposited}\n👝 Carteira: R$ ${result.newWallet}\n🏦 Banco: R$ ${result.newBank}`);
+  } catch {
+    reply('❌ Digite um valor válido para depositar!');
+  }
+}
+break;
+
+case 'sacar':
+case 'saq': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  if (!q) return reply('❌ Digite o valor que deseja sacar. Exemplo: /sacar 1000');
+  
+  try {
+    const amount = parseInt(q);
+    const result = withdraw(sender, amount);
+    reply(`✅ *Saque realizado com sucesso!*\n\n💰 Valor: R$ ${result.withdrawn}\n👝 Carteira: R$ ${result.newWallet}\n🏦 Banco: R$ ${result.newBank}`);
+  } catch {
+    reply('❌ Digite um valor válido para sacar!');
+  }
+}
+break;
+
+case 'depoall':
+case 'depositartudo': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  
+  try {
+    const result = depositAll(sender);
+    reply(`✅ *Depósito total realizado com sucesso!*\n\n💰 Valor: R$ ${result.deposited}\n👝 Carteira: R$ ${result.newWallet}\n🏦 Banco: R$ ${result.newBank}`);
+  } catch {
+    reply('❌ Você não tem dinheiro na carteira para depositar!');
+  }
+}
+break;
+
+case 'saqueall':
+case 'sacartudo': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  
+  try {
+    const result = withdrawAll(sender);
+    reply(`✅ *Saque total realizado com sucesso!*\n\n💰 Valor: R$ ${result.withdrawn}\n👝 Carteira: R$ ${result.newWallet}\n🏦 Banco: R$ ${result.newBank}`);
+  } catch {
+    reply('❌ Você não tem dinheiro no banco para sacar!');
+  }
+}
+break;
+
+case 'transferir':
+case 'pix': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  
+  let targetUser;
+  let amount;
+
+  // Se marcou uma mensagem
+  if (isQuotedMsg) {
+    targetUser = menc_prt;
+    amount = parseInt(q);
+  } 
+  // Se mencionou o @ e valor
+  else {
+    if (!menc_os2) return reply('❌ Marque a mensagem do usuário ou mencione usando @');
+    targetUser = menc_os2;
+    amount = parseInt(q.split(' ').pop());
+  }
+
+  if (!targetUser) return reply('❌ Marque a mensagem do usuário ou mencione usando @');
+  if (!amount || isNaN(amount)) return reply('❌ Digite um valor válido para transferir');
+  
+  try {
+    const result = transfer(sender, targetUser, amount);
+    await nazu.sendMessage(from, {
+      text: `✅ *Transferência realizada com sucesso!*\n\n💰 Valor: R$ ${result.transferred}\n👝 Seu saldo: R$ ${result.fromWallet}\n\n_Transferência feita para @${targetUser.split('@')[0]}_`,
+      mentions: [targetUser]
+    }, { quoted: info });
+  } catch {
+    reply('❌ Não foi possível realizar a transferência. Verifique se o usuário está registrado e se você tem saldo suficiente.');
+  }
+}
+break;
