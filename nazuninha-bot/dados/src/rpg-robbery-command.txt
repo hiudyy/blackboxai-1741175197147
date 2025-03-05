@@ -1,0 +1,58 @@
+// Comando de Assalto
+case 'assaltar':
+case 'roubar': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  
+  // Verifica se marcou alguém
+  if (!menc_os2) return reply('❌ Marque o usuário que deseja assaltar!');
+  
+  try {
+    const player = await checkRPGAction(sender);
+    
+    // Verifica se tem arma no inventário
+    const weapon = player.inventory.find(item => item.type === 'weapon');
+    if (!weapon) {
+      return reply('❌ Você precisa de uma arma para assaltar! Compre uma na /loja\n\nArmas disponíveis:\n🔪 faca (R$ 1.000)\n🔫 revolver (R$ 5.000)\n🎯 rifle (R$ 10.000)');
+    }
+
+    // Verifica se o alvo existe
+    if (!playerExists(menc_os2)) {
+      return reply('❌ Este usuário não está registrado no RPG!');
+    }
+    const target = getPlayer(menc_os2);
+
+    // Tenta realizar o assalto
+    const { attemptRobbery } = require('./.funcs/.rpg/robberySystem.js');
+    const result = attemptRobbery(player, target);
+
+    // Salva as alterações
+    savePlayer(sender, player);
+    savePlayer(menc_os2, target);
+
+    // Mensagem base
+    let message = `🦹‍♂️ *TENTATIVA DE ASSALTO* 🦹‍♂️\n\n`;
+    message += `👤 Assaltante: @${sender.split('@')[0]}\n`;
+    message += `🎯 Alvo: @${menc_os2.split('@')[0]}\n\n`;
+
+    if (result.shieldBroken) {
+      message += `${result.message}\n`;
+      message += `_O escudo foi destruído e agora o alvo está vulnerável!_ 💥`;
+    } else if (result.success) {
+      message += `${result.message}\n`;
+      message += `_Use /dep para guardar o dinheiro roubado!_ 💰`;
+    } else {
+      message += `${result.message}\n`;
+      if (result.penalty) {
+        message += `_Corra antes que a polícia chegue!_ 🚔`;
+      }
+    }
+
+    await nazu.sendMessage(from, {
+      text: message,
+      mentions: [sender, menc_os2]
+    }, { quoted: info });
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
