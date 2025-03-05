@@ -1,0 +1,19 @@
+// Import RPG systems
+const rpgCommands = require('./rpg-commands.js');
+
+// ... rest of your index.js code ...
+
+// RPG command handler
+case 'rpg':
+case 'rpgmenu': {
+    if (!isModoRpg) return reply('❌ O modo RPG está desativado!');
+    reply(menuRpg(prefix));
+}
+break;
+
+// Handle RPG commands
+if (isModoRpg) {
+    rpgCommands(type, nazu, from, sender, info, reply, command, q, prefix);
+}
+
+// ... rest of your index.js code ...
