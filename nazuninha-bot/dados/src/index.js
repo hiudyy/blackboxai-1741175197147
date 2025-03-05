@@ -142,10 +142,15 @@ try {
     // Update panel stats for sent message
     if (enablePanel) {
         const statsPath = path.join(__dirname, '..', 'database', 'panel', 'stats.json');
-        if (fs.existsSync(statsPath)) {
-            const stats = JSON.parse(fs.readFileSync(statsPath));
-            stats.messagesSent++;
-            fs.writeFileSync(statsPath, JSON.stringify(stats));
+        try {
+            let stats = { messagesSent: 0 };
+            if (fs.existsSync(statsPath)) {
+                stats = JSON.parse(fs.readFileSync(statsPath));
+            }
+            stats.messagesSent = (stats.messagesSent || 0) + 1;
+            fs.writeFileSync(statsPath, JSON.stringify(stats, null, 2));
+        } catch (e) {
+            console.error('Error updating stats:', e);
         }
     }
     
