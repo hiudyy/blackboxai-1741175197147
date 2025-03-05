@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nazuninha Bot - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .dark .gradient-bg {
+            background: linear-gradient(135deg, #1e40af 0%, #4c1d95 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 font-poppins transition-colors duration-200">
+    <!-- Navbar -->
+    <nav class="bg-white dark:bg-gray-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <img src="/img/logo.png" alt="Logo" class="h-12 w-12 rounded-full shadow-lg">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Nazuninha Bot</h1>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Painel de Controle</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-moon text-gray-600 dark:text-gray-400 dark:hidden"></i>
+                        <i class="fas fa-sun text-yellow-400 hidden dark:block"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Groups Card -->
+            <a href="/groups" class="stat-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden cursor-pointer">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900">
+                            <i class="fas fa-users text-blue-600 dark:text-blue-300 text-xl"></i>
+                        </div>
+                        <span id="groupCount" class="text-3xl font-bold text-blue-600 dark:text-blue-400"><%= stats.groups %></span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Grupos Ativos</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Clique para ver detalhes</p>
+                </div>
+                <div class="bg-blue-50 dark:bg-blue-900/30 px-6 py-3">
+                    <div class="flex items-center text-blue-600 dark:text-blue-400">
+                        <span class="text-sm font-medium">Ver Grupos</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Commands Card -->
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-3 rounded-full bg-green-100 dark:bg-green-900">
+                            <i class="fas fa-terminal text-green-600 dark:text-green-300 text-xl"></i>
+                        </div>
+                        <span id="commandCount" class="text-3xl font-bold text-green-600 dark:text-green-400"><%= stats.commandsExecuted %></span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Comandos</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Total de comandos executados</p>
+                </div>
+                <div class="bg-green-50 dark:bg-green-900/30 px-6 py-3">
+                    <div class="text-sm text-green-600 dark:text-green-400">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        <span>Atividade do Bot</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Received Card -->
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900">
+                            <i class="fas fa-inbox text-purple-600 dark:text-purple-300 text-xl"></i>
+                        </div>
+                        <span id="receivedCount" class="text-3xl font-bold text-purple-600 dark:text-purple-400"><%= stats.messagesReceived %></span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Mensagens Recebidas</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Total de mensagens processadas</p>
+                </div>
+                <div class="bg-purple-50 dark:bg-purple-900/30 px-6 py-3">
+                    <div class="text-sm text-purple-600 dark:text-purple-400">
+                        <i class="fas fa-envelope mr-2"></i>
+                        <span>Interações</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Sent Card -->
+            <div class="stat-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-3 rounded-full bg-pink-100 dark:bg-pink-900">
+                            <i class="fas fa-paper-plane text-pink-600 dark:text-pink-300 text-xl"></i>
+                        </div>
+                        <span id="sentCount" class="text-3xl font-bold text-pink-600 dark:text-pink-400"><%= stats.messagesSent %></span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Mensagens Enviadas</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Total de respostas enviadas</p>
+                </div>
+                <div class="bg-pink-50 dark:bg-pink-900/30 px-6 py-3">
+                    <div class="text-sm text-pink-600 dark:text-pink-400">
+                        <i class="fas fa-reply mr-2"></i>
+                        <span>Respostas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Premium Users Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-8">
+            <div class="gradient-bg px-6 py-4">
+                <h2 class="text-xl font-semibold text-white">Usuários Premium</h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <% if (stats.premiumUsers && stats.premiumUsers.length > 0) { %>
+                        <% stats.premiumUsers.forEach(user => { %>
+                            <div class="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <img src="<%= user.avatar %>" alt="Avatar" class="w-10 h-10 rounded-full">
+                                <div>
+                                    <h3 class="font-medium text-gray-800 dark:text-white"><%= user.name %></h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Premium até: <%= user.expiresAt %></p>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="col-span-full text-center py-8">
+                            <i class="fas fa-crown text-yellow-400 text-4xl mb-3"></i>
+                            <p class="text-gray-600 dark:text-gray-400">Nenhum usuário premium encontrado</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 shadow-lg mt-8">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-600 dark:text-gray-400 mb-4 md:mb-0">
+                    Desenvolvido com ❤️ por Hiudy
+                </p>
+                <div class="flex space-x-4">
+                    <a href="https://github.com/hiudyy" target="_blank" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    <a href="https://instagram.com/hiudyyy_" target="_blank" class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors">
+                        <i class="fab fa-instagram text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        // Check for saved theme preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
+        });
+
+        // Real-time stats update
+        function updateStats() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('groupCount').textContent = data.groups;
+                    document.getElementById('commandCount').textContent = data.commandsExecuted;
+                    document.getElementById('receivedCount').textContent = data.messagesReceived;
+                    document.getElementById('sentCount').textContent = data.messagesSent;
+                })
+                .catch(error => console.error('Error fetching stats:', error));
+        }
+
+        // Update stats every 5 seconds
+        setInterval(updateStats, 5000);
+    </script>
+</body>
+</html>
