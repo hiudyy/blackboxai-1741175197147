@@ -1,8 +1,108 @@
-// Adicione essas importações no topo do arquivo, junto com as outras:
-const { playerExists, createPlayer, deletePlayer, getPlayer, savePlayer, claimDaily, formatProfile, deposit, withdraw, depositAll, withdrawAll, transfer } = require('./.funcs/.rpg/rpgFunctions.js');
+// ==================== COMANDOS RPG ====================
+// Adicione esses comandos dentro do switch(command):
 
-// Adicione dentro do switch(command), junto com os outros comandos:
+// Comandos de Loja e Inventário
+case 'loja':
+case 'shop': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  
+  try {
+    const player = await checkRPGAction(sender);
+    const shopList = formatShop(player);
+    reply(shopList);
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
 
+case 'habilidades':
+case 'skills': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  
+  try {
+    const player = await checkRPGAction(sender);
+    const skillList = formatSkills(player);
+    reply(skillList);
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
+
+case 'comprar':
+case 'buy': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  if (!q) return reply('❌ Digite o ID do item que deseja comprar. Use /loja para ver os itens disponíveis!');
+  
+  try {
+    const player = await checkRPGAction(sender);
+    const item = purchaseItem(sender, q.toLowerCase());
+    reply(`🛍️ *COMPRA REALIZADA!*\n\n${item.emoji} Você comprou: ${item.name}\n💰 Custou: R$ ${item.price}\n\n_Use /inventario para ver seus itens!_`);
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
+
+case 'aprender':
+case 'learn': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  if (!q) return reply('❌ Digite o ID da habilidade que deseja aprender. Use /habilidades para ver as opções!');
+  
+  try {
+    const player = await checkRPGAction(sender);
+    const skill = learnSkill(sender, q.toLowerCase());
+    reply(`✨ *NOVA HABILIDADE!*\n\n${skill.emoji} Você começou a treinar: ${skill.name}\n\n_O treinamento levará 10 minutos..._\n_Durante este tempo você não poderá realizar outras ações!_`);
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
+
+case 'usar':
+case 'use': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  if (!q) return reply('❌ Digite o ID do item que deseja usar. Use /inventario para ver seus itens!');
+  
+  try {
+    const player = await checkRPGAction(sender);
+    const item = useInventoryItem(sender, q.toLowerCase());
+    reply(`✨ *ITEM USADO!*\n\n${item.emoji} Você usou: ${item.name}\n\n_O efeito foi aplicado com sucesso!_`);
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
+
+case 'inventario':
+case 'inventory':
+case 'inv': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  
+  try {
+    const player = await checkRPGAction(sender);
+    
+    if (!player.inventory?.length) {
+      reply('🎒 Seu inventário está vazio!\n\nUse /loja para comprar itens!');
+      return;
+    }
+
+    let text = `🎒 *SEU INVENTÁRIO* 🎒\n\n`;
+    player.inventory.forEach(item => {
+      text += `${item.emoji} *${item.name}*\n`;
+      text += `├ ${item.description}\n`;
+      text += `└ ID: ${item.id}\n\n`;
+    });
+
+    reply(text);
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
+
+// Comandos de Registro e Perfil
 case 'registrar':
 case 'register': {
   if (playerExists(sender)) return reply('❌ Você já está registrado no RPG! Use /perfil para ver suas informações.');
@@ -11,9 +111,9 @@ case 'register': {
   
   try {
     const player = createPlayer(sender, q);
-    reply(`✅ Registro concluído com sucesso!\n\n${formatProfile(player)}`);
+    reply(`⚔️ *NOVO GUERREIRO REGISTRADO!* ⚔️\n\n_Bem-vindo à sua jornada épica!_\n_Que sua lenda comece aqui..._\n\n${formatProfile(player)}`);
   } catch {
-    reply('❌ Não foi possível fazer seu registro. Tente novamente.');
+    reply('❌ Ops! Algo deu errado no registro. Que tal tentar novamente? Pode ser seu destino se tornar um grande guerreiro! ⚔️');
   }
 }
 break;
@@ -25,9 +125,9 @@ case 'deleteregister': {
   
   try {
     deletePlayer(sender);
-    reply('✅ Seu registro foi deletado com sucesso!');
+    reply('🌟 *REGISTRO REMOVIDO*\n\n_Sua jornada chegou ao fim..._\n_Mas novas aventuras sempre aguardam!_ ⚔️');
   } catch {
-    reply('❌ Não foi possível deletar seu registro.');
+    reply('❌ Não consegui deletar seu registro... Os deuses devem ter outros planos para você! 🌟');
   }
 }
 break;
@@ -50,11 +150,12 @@ case 'status': {
       mentions: [target]
     }, { quoted: info });
   } catch {
-    reply('❌ Não foi possível carregar o perfil.');
+    reply('❌ Os pergaminhos antigos estão um pouco confusos... Não consegui ler seu perfil agora! 📜');
   }
 }
 break;
 
+// Comandos de Economia
 case 'daily':
 case 'reward':
 case 'recompensa': {
@@ -62,9 +163,9 @@ case 'recompensa': {
   
   try {
     const result = claimDaily(sender);
-    reply(`✨ *Recompensa Diária Coletada!*\n\n💰 Você recebeu: R$ ${result.reward}\n🏦 Novo saldo: R$ ${result.newBalance}`);
-  } catch {
-    reply('❌ Você já coletou sua recompensa hoje! Volte amanhã.');
+    reply(`🎁 *RECOMPENSA DIÁRIA!*\n\n✨ Os deuses sorriram para você hoje!\n💰 Você encontrou: R$ ${result.reward}\n🏦 Seu novo saldo: R$ ${result.newBalance}\n\n_Volte amanhã para mais tesouros!_ 🗝️`);
+  } catch (e) {
+    reply('❌ ' + e.message);
   }
 }
 break;
@@ -77,9 +178,9 @@ case 'dep': {
   try {
     const amount = parseInt(q);
     const result = deposit(sender, amount);
-    reply(`✅ *Depósito realizado com sucesso!*\n\n💰 Valor: R$ ${result.deposited}\n👝 Carteira: R$ ${result.newWallet}\n🏦 Banco: R$ ${result.newBank}`);
-  } catch {
-    reply('❌ Digite um valor válido para depositar!');
+    reply(`💎 *DEPÓSITO REALIZADO!*\n\n━━━━━━━━━━━━━━━\n💰 Valor: R$ ${result.deposited}\n👝 Carteira: R$ ${result.newWallet}\n🏦 Banco: R$ ${result.newBank}\n━━━━━━━━━━━━━━━\n\n_Suas moedas foram guardadas em segurança!_ 🔒`);
+  } catch (e) {
+    reply('❌ ' + e.message);
   }
 }
 break;
@@ -92,9 +193,9 @@ case 'saq': {
   try {
     const amount = parseInt(q);
     const result = withdraw(sender, amount);
-    reply(`✅ *Saque realizado com sucesso!*\n\n💰 Valor: R$ ${result.withdrawn}\n👝 Carteira: R$ ${result.newWallet}\n🏦 Banco: R$ ${result.newBank}`);
-  } catch {
-    reply('❌ Digite um valor válido para sacar!');
+    reply(`💎 *SAQUE REALIZADO!*\n\n━━━━━━━━━━━━━━━\n💰 Valor: R$ ${result.withdrawn}\n👝 Carteira: R$ ${result.newWallet}\n🏦 Banco: R$ ${result.newBank}\n━━━━━━━━━━━━━━━\n\n_Suas moedas estão prontas para uso!_ 💫`);
+  } catch (e) {
+    reply('❌ ' + e.message);
   }
 }
 break;
@@ -105,9 +206,9 @@ case 'depositartudo': {
   
   try {
     const result = depositAll(sender);
-    reply(`✅ *Depósito total realizado com sucesso!*\n\n💰 Valor: R$ ${result.deposited}\n👝 Carteira: R$ ${result.newWallet}\n🏦 Banco: R$ ${result.newBank}`);
-  } catch {
-    reply('❌ Você não tem dinheiro na carteira para depositar!');
+    reply(`💎 *DEPÓSITO TOTAL!*\n\n━━━━━━━━━━━━━━━\n💰 Valor: R$ ${result.deposited}\n👝 Carteira: R$ ${result.newWallet}\n🏦 Banco: R$ ${result.newBank}\n━━━━━━━━━━━━━━━\n\n_Todo seu tesouro foi guardado com segurança!_ 🔒`);
+  } catch (e) {
+    reply('❌ ' + e.message);
   }
 }
 break;
@@ -118,9 +219,9 @@ case 'sacartudo': {
   
   try {
     const result = withdrawAll(sender);
-    reply(`✅ *Saque total realizado com sucesso!*\n\n💰 Valor: R$ ${result.withdrawn}\n👝 Carteira: R$ ${result.newWallet}\n🏦 Banco: R$ ${result.newBank}`);
-  } catch {
-    reply('❌ Você não tem dinheiro no banco para sacar!');
+    reply(`💎 *SAQUE TOTAL!*\n\n━━━━━━━━━━━━━━━\n💰 Valor: R$ ${result.withdrawn}\n👝 Carteira: R$ ${result.newWallet}\n🏦 Banco: R$ ${result.newBank}\n━━━━━━━━━━━━━━━\n\n_Todo seu tesouro está em suas mãos!_ 💰`);
+  } catch (e) {
+    reply('❌ ' + e.message);
   }
 }
 break;
@@ -150,11 +251,207 @@ case 'pix': {
   try {
     const result = transfer(sender, targetUser, amount);
     await nazu.sendMessage(from, {
-      text: `✅ *Transferência realizada com sucesso!*\n\n💰 Valor: R$ ${result.transferred}\n👝 Seu saldo: R$ ${result.fromWallet}\n\n_Transferência feita para @${targetUser.split('@')[0]}_`,
+      text: `💎 *PIX REALIZADO!*\n\n━━━━━━━━━━━━━━━\n💰 Valor: R$ ${result.transferred}\n👝 Seu saldo: R$ ${result.fromWallet}\n━━━━━━━━━━━━━━━\n\n_Moedas enviadas para @${targetUser.split('@')[0]} com sucesso!_ ✨`,
       mentions: [targetUser]
     }, { quoted: info });
-  } catch {
-    reply('❌ Não foi possível realizar a transferência. Verifique se o usuário está registrado e se você tem saldo suficiente.');
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
+
+// Comandos de Batalha e Treino
+case 'treinar':
+case 'train': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  if (!q) return reply('❌ Digite o atributo que deseja treinar. Exemplo: /treinar força\n\nAtributos disponíveis:\n- força\n- defesa\n- stamina\n- vida');
+  
+  try {
+    const result = train(sender, q);
+    reply(`🏋️‍♂️ *TREINO FINALIZADO!*\n\n━━━━━━━━━━━━━━━\n💪 Atributo: ${result.attribute}\n📈 Ganho: +${result.gained}\n✨ Novo valor: ${result.newValue}\n⚡ Energia: ${result.energy}\n━━━━━━━━━━━━━━━\n\n📊 Level: ${result.level}\n🌟 XP: ${result.xp}\n\n_Continue treinando para se tornar mais forte!_ 💪`);
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
+
+case 'curar':
+case 'heal': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  if (!q) return reply('❌ Digite quanto de vida deseja curar. Exemplo: /curar 50\n\nCusto: R$ 10 por ponto de vida');
+  
+  try {
+    const amount = parseInt(q);
+    if (isNaN(amount) || amount <= 0) return reply('❌ Digite um valor válido para curar');
+    
+    const result = heal(sender, amount);
+    reply(`💖 *CURA DIVINA!*\n\n━━━━━━━━━━━━━━━\n❤️ Vida recuperada: ${result.healed}\n💖 Vida atual: ${result.newHealth}\n━━━━━━━━━━━━━━━\n\n💰 Custo: R$ ${result.cost}\n👝 Carteira: R$ ${result.wallet}\n\n_Seus ferimentos foram curados pela energia sagrada!_ ✨`);
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
+
+case 'batalhar':
+case 'lutar':
+case 'fight': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  if (!q) return reply('❌ Digite contra qual inimigo deseja lutar:\n\n🟢 slime (Nível 1)\n👺 goblin (Nível 1)\n💀 skeleton (Nível 2)\n🐺 wolf (Nível 3)\n👹 orc (Nível 4)');
+  
+  try {
+    const player = await checkTraining(sender);
+    if (!player) return;
+    const result = startBattle(sender, q.toLowerCase());
+    
+    // Envia o log da batalha
+    let battleText = `⚔️ *BATALHA INICIADA!* ⚔️\n\n`;
+    battleText += result.log.join('\n');
+    
+    if (result.won) {
+      battleText += `\n\n━━━━━━━━━━━━━━━`;
+      if (result.levelUp) {
+        battleText += `\n🎊 *LEVEL UP!* 🎊\n`;
+        battleText += `📊 Novo nível: ${getPlayer(sender).level}\n`;
+      }
+      
+      // Se ganhou novas conquistas
+      if (result.newAchievements?.length > 0) {
+        battleText += `\n🏆 *NOVAS CONQUISTAS!* 🏆\n`;
+        for (const achievement of result.newAchievements) {
+          battleText += `\n${achievement.emoji} ${achievement.title}`;
+          battleText += `\n├ ${achievement.description}`;
+          battleText += `\n├ 💰 +R$ ${achievement.reward.money}`;
+          battleText += `\n└ ✨ +${achievement.reward.xp} XP\n`;
+        }
+      }
+    }
+    
+    reply(battleText);
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
+
+case 'pvp':
+case 'duelar': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  
+  // Verifica se marcou alguém
+  if (!menc_os2) return reply('❌ Marque o jogador que deseja desafiar!');
+  
+  try {
+    const result = startPvpBattle(sender, menc_os2);
+    
+    // Envia o log da batalha
+    let battleText = result.log.join('\n');
+    
+    // Se alguém ganhou conquistas
+    if (result.newAchievements.player1?.length > 0 || result.newAchievements.player2?.length > 0) {
+      battleText += `\n\n🏆 *NOVAS CONQUISTAS!* 🏆\n`;
+      
+      // Conquistas do player 1
+      for (const achievement of result.newAchievements.player1 || []) {
+        battleText += `\n${achievement.emoji} ${achievement.title}`;
+        battleText += `\n├ ${achievement.description}`;
+        battleText += `\n├ 💰 +R$ ${achievement.reward.money}`;
+        battleText += `\n└ ✨ +${achievement.reward.xp} XP\n`;
+      }
+      
+      // Conquistas do player 2
+      for (const achievement of result.newAchievements.player2 || []) {
+        battleText += `\n${achievement.emoji} ${achievement.title}`;
+        battleText += `\n├ ${achievement.description}`;
+        battleText += `\n├ 💰 +R$ ${achievement.reward.money}`;
+        battleText += `\n└ ✨ +${achievement.reward.xp} XP\n`;
+      }
+    }
+    
+    await nazu.sendMessage(from, {
+      text: battleText,
+      mentions: [sender, menc_os2]
+    }, { quoted: info });
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
+
+// Comandos de Trabalho
+case 'trabalhos':
+case 'jobs': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  
+  try {
+    const player = getPlayer(sender);
+    const jobList = formatJobList(player);
+    reply(jobList);
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
+
+case 'trabalhar':
+case 'work': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  
+  try {
+    const player = await checkTraining(sender);
+    if (!player) return;
+    const result = startWork(sender);
+    let workText = `💼 *TRABALHO*\n\n`;
+    workText += `${result.message}\n\n`;
+    
+    if (result.success) {
+      workText += `━━━━━━━━━━━━━━━\n`;
+      workText += `💰 Salário: R$ ${result.rewards.money}\n`;
+      workText += `✨ XP: ${result.rewards.xp}\n`;
+      workText += `📈 XP do Trabalho: ${result.rewards.jobExp}\n`;
+      
+      if (result.levelUp) {
+        workText += `\n🎊 *LEVEL UP!* 🎊\n`;
+        workText += `📊 Novo nível: ${getPlayer(sender).level}\n`;
+      }
+      
+      if (result.promotion) {
+        workText += `\n🎉 *PROMOÇÃO!* 🎉\n`;
+        workText += `Ao sair do trabalho, você recebeu uma proposta!\n`;
+        workText += `💼 Novo cargo: ${result.promotion.jobName}\n`;
+        workText += `\nUse /aceitarpromocao para aceitar!`;
+      }
+    }
+    
+    reply(workText);
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
+
+case 'emprego':
+case 'contrato': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  if (!q) return reply('❌ Digite qual emprego deseja. Use /trabalhos para ver as opções!');
+  
+  try {
+    const job = applyForJob(sender, q.toLowerCase());
+    reply(`🎉 *CONTRATADO!*\n\n_Parabéns! Você foi contratado como ${job.name}!_\n\n💼 Use /trabalhar para começar seu turno!`);
+  } catch (e) {
+    reply('❌ ' + e.message);
+  }
+}
+break;
+
+case 'pedirdemissao':
+case 'demitir': {
+  if (!playerExists(sender)) return reply('❌ Você não está registrado no RPG! Use /registrar para começar.');
+  
+  try {
+    const oldJob = resignFromJob(sender);
+    reply(`📄 *CARTA DE DEMISSÃO*\n\n_Você se demitiu do cargo de ${oldJob.name}._\n\nUse /trabalhos para ver outras oportunidades!`);
+  } catch (e) {
+    reply('❌ ' + e.message);
   }
 }
 break;
